@@ -1,0 +1,235 @@
+import 'package:flutter/material.dart';
+import 'package:my_fishing_log/Data/UserInfo.dart';
+import '../Data/API.dart';
+import '../app.dart';
+import '../refector.dart';
+
+class Register extends StatefulWidget {
+  const Register({super.key});
+
+  @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  late String userId;
+  late String userPw;
+  late String userNick;
+  final _formkey = GlobalKey<FormState>();
+  String idCheck = "";
+  String nickCheck = "";
+  bool isSignupScreen = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkUserInfo();
+  }
+
+  void checkUserInfo() async {
+    final userID = await getUserID();
+    final password = await getUserPw();
+    if (userID!.isNotEmpty && password!.isNotEmpty) {
+      await api_connect.UserLogin(userID, password);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => App()),
+        (route) => false,
+      );
+    }
+  }
+
+  void _tryValidation() {
+    final isValid = _formkey.currentState!.validate();
+    if (isValid) {
+      _formkey.currentState!.save();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Container(
+          color: Colors.blue,
+          child: Center(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              color: Colors.white,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formkey,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isSignupScreen = false;
+                              });
+                            },
+                            child: Column(
+                              children: [
+                                Text(
+                                  'LOGIN',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: !isSignupScreen
+                                        ? Palette.activeColor
+                                        : Palette.textColor1, //사망조건 연산자
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isSignupScreen = true;
+                              });
+                            },
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'SIGNUP',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: isSignupScreen
+                                            ? Palette.activeColor
+                                            : Palette.textColor1,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 15,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      TextFormField(
+                        key: ValueKey(1),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "빈칸은 불가능 합니다";
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          userId = value;
+                        },
+                        decoration: textformfieldDecoration(
+                            "ID", Icons.account_circle_rounded),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.02,
+                      ),
+                      TextFormField(
+                        key: ValueKey(2),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "빈칸은 불가능 합니다";
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          userNick = value;
+                        },
+                        decoration: textformfieldDecoration(
+                            "NickName", Icons.person_pin_outlined),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.02,
+                      ),
+                      TextFormField(
+                        key: ValueKey(3),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "빈칸은 불가능 합니다";
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          userPw = value;
+                        },
+                        decoration: textformfieldDecoration(
+                            "PW", Icons.password_rounded),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.02,
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Palette.textformColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: () async {
+                            _tryValidation();
+                            String signup = await api_connect.UserSignup(
+                                userId, userPw, userNick);
+                            String nick =
+                                await api_connect.UserLogin(userId, userPw);
+                            if (true) {
+                              print(signup);
+                              print(nick);
+                              // Navigator.pop(context);
+                              // snackbar(context, signup);
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => App(),
+                              //   ),
+                              // );
+                              await saveUserID(userId);
+                              await saveUserPw(userPw);
+                              snackbar(context, signup);
+                              ;
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) => App()),
+                                (route) => false,
+                              );
+                            } else {
+                              snackbar(context, signup);
+                            }
+                            // if (await api_connect.UserSignup(id, pw, nickname) ==
+                            //     "닉네임 혹은 아이디가 중복입니다") {
+                            //   idCheck = await api_connect.CheckUserID(id);
+                            //   nickCheck = await api_connect.CheckUserNick(nickname);
+                            // }
+                          },
+                          child: Text(
+                            "회원가입",
+                            style: textStyle(
+                                18, Colors.black87, FontWeight.w300, 1.0),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

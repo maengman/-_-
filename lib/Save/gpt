@@ -1,0 +1,17 @@
+1. RaisedButton: 눌리면 반응이 일어나는 높은 버튼
+2. FlatButton: 눌리면 반응이 일어나는 평면 버튼
+3. OutlineButton: 테두리만 있는 버튼
+4. IconButton: 아이콘을 포함한 버튼
+5. FloatingActionButton: 원형으로 된 플로팅 버튼
+6. DropdownButton: 드롭다운 메뉴를 표시하는 버튼
+7. ToggleButton: 누를 때마다 상태가 변경되는 버튼
+8. CupertinoButton: iOS 스타일의 버튼
+
+
+
+Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (BuildContext context) => NextScreen()),
+  (route) => false,
+);
+// 이전화면들의 정보를 모두 제거하고 NextScreen으로 이동하는 코드
